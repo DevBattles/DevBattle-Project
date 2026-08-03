@@ -30,6 +30,12 @@ export const StudentDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
 
+  if (!currentUser) return null;
+
+  /** Freshly approved accounts have no history yet - avoid showing fake progress copy. */
+  const isNewUser = currentUser.problemsSolved === 0;
+  const firstName = currentUser.name.split(' ')[0];
+
   const activityData = [
     { day: 'Mon', solved: 4, xp: 240 },
     { day: 'Tue', solved: 6, xp: 380 },
@@ -50,13 +56,23 @@ export const StudentDashboard: React.FC = () => {
               <span className="text-xs font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2.5 py-0.5 rounded-md border border-indigo-500/20">
                 {currentUser.collegeName || 'DevBattles Arena'}
               </span>
-              <span className="text-xs text-slate-400">· {currentUser.batchName}</span>
+              {currentUser.batchName && <span className="text-xs text-slate-400">· {currentUser.batchName}</span>}
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white">
-              Welcome back, {currentUser.name}! 👋
+              {isNewUser ? `Welcome to DevBattles, ${firstName}!` : `Welcome back, ${firstName}!`} 👋
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
-              You are currently on a <strong className="text-amber-400">{currentUser.streak}-day daily streak</strong>! You have 1 homework assignment due in 5 days.
+              {isNewUser ? (
+                <>
+                  Your account is verified and active. Solve your first problem to start a{' '}
+                  <strong className="text-amber-400">daily streak</strong> and climb the batch leaderboard.
+                </>
+              ) : (
+                <>
+                  You are currently on a <strong className="text-amber-400">{currentUser.streak}-day daily streak</strong>!
+                  You have 1 homework assignment due in 5 days.
+                </>
+              )}
             </p>
           </div>
 
@@ -78,29 +94,29 @@ export const StudentDashboard: React.FC = () => {
           title="Problems Solved"
           value={currentUser.problemsSolved}
           icon={<Code2 className="w-5 h-5 text-indigo-400" />}
-          trend={{ value: '+12 this week', isPositive: true }}
-          subtitle="Top 8% in batch"
+          trend={isNewUser ? undefined : { value: '+12 this week', isPositive: true }}
+          subtitle={isNewUser ? 'Solve your first problem' : 'Top 8% in batch'}
         />
         <StatCard
           title="Current Streak"
           value={`${currentUser.streak} Days`}
           icon={<Flame className="w-5 h-5 text-amber-400" />}
-          trend={{ value: 'Personal Best', isPositive: true }}
-          subtitle="Keep coding daily"
+          trend={isNewUser ? undefined : { value: 'Personal Best', isPositive: true }}
+          subtitle={isNewUser ? 'Start your streak today' : 'Keep coding daily'}
         />
         <StatCard
           title="Global Arena Rank"
-          value={`#${currentUser.rank}`}
+          value={currentUser.rank > 0 ? `#${currentUser.rank}` : 'Unranked'}
           icon={<Trophy className="w-5 h-5 text-cyan-400" />}
-          trend={{ value: 'Up 3 places', isPositive: true }}
-          subtitle="Among 150k coders"
+          trend={isNewUser ? undefined : { value: 'Up 3 places', isPositive: true }}
+          subtitle={isNewUser ? 'Rank unlocks after 1st solve' : 'Among 150k coders'}
         />
         <StatCard
           title="Total Earned XP"
           value={currentUser.xp.toLocaleString()}
           icon={<Zap className="w-5 h-5 text-emerald-400" />}
-          trend={{ value: '+680 XP today', isPositive: true }}
-          subtitle="Level 18 Grandmaster"
+          trend={isNewUser ? undefined : { value: '+680 XP today', isPositive: true }}
+          subtitle={isNewUser ? 'Earn XP with every solve' : 'Level 18 Grandmaster'}
         />
       </div>
 

@@ -4,13 +4,15 @@ export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Expert';
 
 export type ProblemType = 'dsa' | 'frontend' | 'fullstack';
 
+export type UserStatus = 'active' | 'pending' | 'suspended' | 'rejected';
+
 export interface User {
   id: string;
   name: string;
   email: string;
   avatar: string;
   role: Role;
-  status: 'active' | 'pending' | 'suspended';
+  status: UserStatus;
   collegeId?: string;
   collegeName?: string;
   branchName?: string;

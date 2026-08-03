@@ -5,7 +5,9 @@ import { Badge } from '../../components/ui/Badge';
 import { useAuth } from '../../context/AuthContext';
 
 export const ProfilePage: React.FC = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, role } = useAuth();
+
+  if (!currentUser) return null;
 
   return (
     <div className="space-y-8 pb-12">
@@ -20,14 +22,18 @@ export const ProfilePage: React.FC = () => {
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
               <h1 className="text-2xl font-black text-white">{currentUser.name}</h1>
               <Badge variant="indigo" icon={<Trophy className="w-3 h-3" />}>
-                Rank #{currentUser.rank} Global
+                {currentUser.rank > 0 ? `Rank #${currentUser.rank} Global` : 'Unranked'}
+              </Badge>
+              <Badge variant={role === 'admin' ? 'rose' : role === 'mentor' ? 'amber' : 'cyan'}>
+                {currentUser.role.toUpperCase()}
               </Badge>
             </div>
-            <p className="text-xs text-slate-400">{currentUser.bio}</p>
+            <p className="text-xs text-slate-400">{currentUser.bio || 'No bio added yet.'}</p>
+            <p className="text-[11px] text-slate-500">{currentUser.email} · Joined {currentUser.joinedAt}</p>
             <div className="flex flex-wrap gap-4 text-xs text-slate-400 pt-2 justify-center sm:justify-start">
               <span className="flex items-center gap-1">
                 <Building2 className="w-3.5 h-3.5 text-indigo-400" />
-                {currentUser.collegeName}
+                {currentUser.collegeName || 'No campus mapped'}
               </span>
               <span className="flex items-center gap-1">
                 <Flame className="w-3.5 h-3.5 text-amber-400" />

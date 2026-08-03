@@ -18,6 +18,8 @@ import {
   Users,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { roleHome } from '../../utils/roles';
 import { Hero3DCanvas } from '../../components/3d/Hero3DCanvas';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
@@ -27,7 +29,11 @@ import { Footer } from '../../components/layout/Footer';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { currentUser, role } = useAuth();
   const [activePreviewTab, setActivePreviewTab] = useState('editor');
+
+  /** Signed-in visitors jump straight to their workspace, everyone else signs up first. */
+  const enterPlatform = () => navigate(currentUser ? roleHome(role) : '/register');
 
   const stats = [
     { value: '150,000+', label: 'Active Developers' },
@@ -124,8 +130,8 @@ export const LandingPage: React.FC = () => {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="flex items-center justify-center gap-4 pt-2 flex-wrap"
             >
-              <Button size="lg" variant="glow" icon={<Play className="w-4 h-4" />} onClick={() => navigate('/dashboard')}>
-                Launch Arena Free
+              <Button size="lg" variant="glow" icon={<Play className="w-4 h-4" />} onClick={enterPlatform}>
+                {currentUser ? 'Go to My Workspace' : 'Launch Arena Free'}
               </Button>
               <Button size="lg" variant="secondary" icon={<Code2 className="w-4 h-4" />} onClick={() => navigate('/workspace/q-101')}>
                 Try IDE Demo
@@ -270,8 +276,8 @@ export const LandingPage: React.FC = () => {
                     <span className="text-slate-500 text-[10px]">Total XP</span>
                   </div>
                 </div>
-                <Button size="sm" variant="glow" className="w-full" onClick={() => navigate('/dashboard')}>
-                  Go to Student Dashboard
+                <Button size="sm" variant="glow" className="w-full" onClick={enterPlatform}>
+                  {currentUser ? 'Go to My Dashboard' : 'Start Free - Create Account'}
                 </Button>
               </div>
             )}
@@ -312,8 +318,8 @@ export const LandingPage: React.FC = () => {
             Join thousands of engineering students and faculty mentors on DevBattles today.
           </p>
           <div className="flex items-center justify-center gap-4 flex-wrap pt-2">
-            <Button size="lg" variant="glow" onClick={() => navigate('/register')}>
-              Create Free Account
+            <Button size="lg" variant="glow" onClick={enterPlatform}>
+              {currentUser ? 'Go to My Workspace' : 'Create Free Account'}
             </Button>
             <Button size="lg" variant="outline" onClick={() => navigate('/pricing')}>
               View College Plans

@@ -4,8 +4,10 @@ import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadius
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { ProgressBar } from '../../components/ui/StatCard';
+import { useAuth } from '../../context/AuthContext';
 
 export const ProgressPage: React.FC = () => {
+  const { currentUser } = useAuth();
   const radarData = [
     { subject: 'Arrays & Maps', score: 95 },
     { subject: 'Two Pointers', score: 88 },
@@ -41,7 +43,7 @@ export const ProgressPage: React.FC = () => {
                 <PolarGrid stroke="rgba(255,255,255,0.1)" />
                 <PolarAngleAxis dataKey="subject" stroke="#94a3b8" fontSize={11} />
                 <PolarRadiusAxis stroke="#64748b" />
-                <Radar name="Aarav" dataKey="score" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.4} />
+                <Radar name={currentUser?.name.split(' ')[0] ?? 'You'} dataKey="score" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.4} />
               </RadarChart>
             </ResponsiveContainer>
           </div>

@@ -1,31 +1,100 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Code2, Trophy, BookOpen, Layers, User, Settings, Sun, Moon, ArrowRight, Shield } from 'lucide-react';
+import {
+  Search,
+  Code2,
+  Trophy,
+  BookOpen,
+  Layers,
+  User,
+  Settings,
+  Sun,
+  Moon,
+  ArrowRight,
+  Shield,
+  Users,
+  Building2,
+  FileText,
+  LogIn,
+  LogOut,
+  UserPlus,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCommandPalette } from '../../context/CommandPaletteContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
+
+interface PaletteAction {
+  id: string;
+  name: string;
+  icon: React.ReactNode;
+  category: string;
+  run: () => void;
+}
 
 export const CommandPalette: React.FC = () => {
   const { isOpen, closePalette } = useCommandPalette();
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
-  const { switchRole } = useAuth();
+  const { currentUser, role, logout } = useAuth();
+  const { addToast } = useToast();
 
   if (!isOpen) return null;
 
-  const actions = [
+  const handleLogout = () => {
+    const name = currentUser?.name ?? 'Developer';
+    logout();
+    addToast('success', 'Signed Out', `See you soon, ${name}! Your session has been closed.`);
+    navigate('/login', { replace: true });
+  };
+
+  const studentActions: PaletteAction[] = [
     { id: 'p-dashboard', name: 'Go to Dashboard', icon: <Layers className="w-4 h-4" />, category: 'Navigation', run: () => navigate('/dashboard') },
     { id: 'p-questions', name: 'Explore Question Bank', icon: <Code2 className="w-4 h-4" />, category: 'Navigation', run: () => navigate('/questions') },
     { id: 'p-homework', name: 'View Daily Homework', icon: <BookOpen className="w-4 h-4" />, category: 'Navigation', run: () => navigate('/homework') },
     { id: 'p-contests', name: 'Join Coding Contests', icon: <Trophy className="w-4 h-4" />, category: 'Navigation', run: () => navigate('/contests') },
     { id: 'p-ide', name: 'Open Coding Workspace (IDE)', icon: <Code2 className="w-4 h-4 text-emerald-400" />, category: 'IDE', run: () => navigate('/workspace/q-101') },
-    { id: 'p-profile', name: 'View My Profile', icon: <User className="w-4 h-4" />, category: 'Account', run: () => navigate('/profile') },
-    { id: 'p-settings', name: 'Account Settings', icon: <Settings className="w-4 h-4" />, category: 'Account', run: () => navigate('/settings') },
-    { id: 'role-student', name: 'Switch to Student View', icon: <User className="w-4 h-4 text-indigo-400" />, category: 'Role Switcher', run: () => { switchRole('student'); navigate('/dashboard'); } },
-    { id: 'role-mentor', name: 'Switch to Mentor View', icon: <Shield className="w-4 h-4 text-amber-400" />, category: 'Role Switcher', run: () => { switchRole('mentor'); navigate('/mentor'); } },
-    { id: 'role-admin', name: 'Switch to Admin View', icon: <Shield className="w-4 h-4 text-rose-400" />, category: 'Role Switcher', run: () => { switchRole('admin'); navigate('/admin'); } },
+  ];
+
+  const mentorActions: PaletteAction[] = [
+    { id: 'm-overview', name: 'Go to Mentor Overview', icon: <Layers className="w-4 h-4" />, category: 'Navigation', run: () => navigate('/mentor') },
+    { id: 'm-homework', name: 'Open Homework Builder', icon: <BookOpen className="w-4 h-4" />, category: 'Navigation', run: () => navigate('/mentor/homework-builder') },
+    { id: 'm-students', name: 'View Students Roster', icon: <Users className="w-4 h-4" />, category: 'Navigation', run: () => navigate('/mentor/students') },
+    { id: 'm-analytics', name: 'Batch Analytics', icon: <Trophy className="w-4 h-4" />, category: 'Navigation', run: () => navigate('/mentor/analytics') },
+  ];
+
+  const adminActions: PaletteAction[] = [
+    { id: 'a-dashboard', name: 'Go to Admin Console', icon: <Shield className="w-4 h-4 text-rose-400" />, category: 'Navigation', run: () => navigate('/admin') },
+    { id: 'a-approvals', name: 'Review Approval Queue', icon: <Users className="w-4 h-4" />, category: 'Administration', run: () => navigate('/admin/approvals') },
+    { id: 'a-users', name: 'Manage Users & Roles', icon: <Users className="w-4 h-4" />, category: 'Administration', run: () => navigate('/admin/users') },
+    { id: 'a-colleges', name: 'College Hierarchy', icon: <Building2 className="w-4 h-4" />, category: 'Administration', run: () => navigate('/admin/colleges') },
+    { id: 'a-logs', name: 'Audit Trail Logs', icon: <FileText className="w-4 h-4" />, category: 'Administration', run: () => navigate('/admin/audit-logs') },
+  ];
+
+  const accountActions: PaletteAction[] = currentUser
+    ? [
+        { id: 'p-profile', name: 'View My Profile', icon: <User className="w-4 h-4" />, category: 'Account', run: () => navigate('/profile') },
+        { id: 'p-settings', name: 'Account Settings', icon: <Settings className="w-4 h-4" />, category: 'Account', run: () => navigate('/settings') },
+        { id: 'p-logout', name: 'Log Out', icon: <LogOut className="w-4 h-4 text-rose-400" />, category: 'Account', run: handleLogout },
+      ]
+    : [
+        { id: 'p-login', name: 'Sign In', icon: <LogIn className="w-4 h-4" />, category: 'Account', run: () => navigate('/login') },
+        { id: 'p-register', name: 'Create an Account', icon: <UserPlus className="w-4 h-4" />, category: 'Account', run: () => navigate('/register') },
+      ];
+
+  const roleActions = !currentUser
+    ? []
+    : role === 'admin'
+    ? adminActions
+    : role === 'mentor'
+    ? mentorActions
+    : studentActions;
+
+  const actions: PaletteAction[] = [
+    ...roleActions,
+    ...accountActions,
     { id: 'p-theme', name: `Toggle Theme (Current: ${theme})`, icon: theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />, category: 'Preferences', run: () => toggleTheme() },
   ];
 
@@ -34,7 +103,7 @@ export const CommandPalette: React.FC = () => {
     a.category.toLowerCase().includes(query.toLowerCase())
   );
 
-  const handleSelect = (action: typeof actions[0]) => {
+  const handleSelect = (action: PaletteAction) => {
     action.run();
     closePalette();
     setQuery('');
@@ -76,7 +145,7 @@ export const CommandPalette: React.FC = () => {
           <div className="max-h-80 overflow-y-auto p-2 divide-y divide-slate-800/40">
             {filteredActions.length === 0 ? (
               <div className="p-8 text-center text-sm text-slate-500">
-                No matching command found. Try searching "IDE" or "Role".
+                No matching command found. Try searching "IDE", "Profile" or "Log Out".
               </div>
             ) : (
               filteredActions.map((item) => (
