@@ -1,0 +1,124 @@
+import React, { useState } from 'react';
+import { Search, Filter, Bookmark, Code2, CheckCircle2, Building, Sparkles } from 'lucide-react';
+import { Card } from '../../components/ui/Card';
+import { Badge } from '../../components/ui/Badge';
+import { QuestionCard } from '../../components/domain/QuestionCard';
+import { mockQuestions } from '../../data/mockData';
+import { Difficulty } from '../../types';
+
+export const QuestionBankPage: React.FC = () => {
+  const [search, setSearch] = useState('');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('All');
+  const [selectedCompany, setSelectedCompany] = useState<string>('All');
+  const [onlyBookmarked, setOnlyBookmarked] = useState(false);
+
+  const companies = ['All', 'Google', 'Amazon', 'Meta', 'Microsoft', 'Linear', 'Vercel'];
+
+  const filteredQuestions = mockQuestions.filter((q) => {
+    const matchesSearch =
+      q.title.toLowerCase().includes(search.toLowerCase()) ||
+      q.category.toLowerCase().includes(search.toLowerCase()) ||
+      q.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
+
+    const matchesDifficulty = selectedDifficulty === 'All' || q.difficulty === selectedDifficulty;
+    const matchesCompany = selectedCompany === 'All' || q.companies.includes(selectedCompany);
+    const matchesBookmark = !onlyBookmarked || q.isBookmarked;
+
+    return matchesSearch && matchesDifficulty && matchesCompany && matchesBookmark;
+  });
+
+  return (
+    <div className="space-y-8 pb-12">
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              <Code2 className="w-5 h-5" />
+            </span>
+            <h1 className="text-2xl font-black text-slate-100 light:text-slate-900">Algorithmic & Frontend Question Bank</h1>
+          </div>
+          <p className="text-xs text-slate-400">
+            Practice production-grade DSA problems, system designs, and frontend challenges.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setOnlyBookmarked(!onlyBookmarked)}
+            className={`px-3 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 ${
+              onlyBookmarked
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+            }`}
+          >
+            <Bookmark className="w-3.5 h-3.5" /> Bookmarks Only
+          </button>
+        </div>
+      </div>
+
+      {/* FILTER CONTROLS BAR */}
+      <Card className="p-4 space-y-4">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by title, tag, category or algorithm (e.g. Two Sum, Hash Map)..."
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs focus:outline-none focus:border-indigo-500 text-slate-200"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            {['All', 'Easy', 'Medium', 'Hard'].map((diff) => (
+              <button
+                key={diff}
+                onClick={() => setSelectedDifficulty(diff)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                  selectedDifficulty === diff
+                    ? 'bg-indigo-600 border-indigo-500 text-white'
+                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {diff}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Company Tags Bar */}
+        <div className="flex items-center gap-2 overflow-x-auto pt-2 border-t border-slate-800/60 text-xs">
+          <span className="text-slate-500 font-semibold shrink-0">Company Tags:</span>
+          {companies.map((c) => (
+            <button
+              key={c}
+              onClick={() => setSelectedCompany(c)}
+              className={`px-2.5 py-1 rounded-md transition-colors shrink-0 ${
+                selectedCompany === c
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold'
+                  : 'bg-slate-950 text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+      </Card>
+
+      {/* QUESTION GRID */}
+      {filteredQuestions.length === 0 ? (
+        <div className="text-center py-12 text-slate-500 text-sm">
+          No matching problems found. Try clearing filters or searching for "Two Sum".
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredQuestions.map((question) => (
+            <QuestionCard key={question.id} question={question} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
