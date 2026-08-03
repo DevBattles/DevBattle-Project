@@ -1,11 +1,7 @@
-# DevBattle platform orchestration (root).
-# The User Microservice lives in ./user-service.
-# Run `docker compose up` to bring up PostgreSQL + the User Service together.
-
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: devbattle-postgres
+    container_name: devbattle-user-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
@@ -23,7 +19,7 @@ services:
 
   user-service:
     build:
-      context: ./user-service
+      context: .
       dockerfile: Dockerfile
     container_name: devbattle-user-service
     restart: unless-stopped
