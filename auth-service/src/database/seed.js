@@ -6,8 +6,9 @@ import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { db, client } from '../config/db.config.js';
-import { users } from './schema.js';
 import { logger } from '../utils/logger.js';
+
+import { users } from './schema.js';
 
 const SALT_ROUNDS = 12;
 

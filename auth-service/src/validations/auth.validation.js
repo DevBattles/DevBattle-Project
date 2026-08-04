@@ -11,8 +11,14 @@ import { ROLES, ALL_ROLES, PASSWORD_POLICY } from '../constants/index.js';
  */
 const passwordSchema = z
   .string()
-  .min(PASSWORD_POLICY.MIN_LENGTH, `Password must be at least ${PASSWORD_POLICY.MIN_LENGTH} characters`)
-  .max(PASSWORD_POLICY.MAX_LENGTH, `Password must not exceed ${PASSWORD_POLICY.MAX_LENGTH} characters`)
+  .min(
+    PASSWORD_POLICY.MIN_LENGTH,
+    `Password must be at least ${PASSWORD_POLICY.MIN_LENGTH} characters`,
+  )
+  .max(
+    PASSWORD_POLICY.MAX_LENGTH,
+    `Password must not exceed ${PASSWORD_POLICY.MAX_LENGTH} characters`,
+  )
   .regex(PASSWORD_POLICY.REGEX, PASSWORD_POLICY.REGEX_DESCRIPTION);
 
 /**
@@ -69,26 +75,30 @@ export const forgotPasswordSchema = z.object({
 /**
  * Reset password request body schema.
  */
-export const resetPasswordSchema = z.object({
-  token: z.string().min(1, 'Reset token is required'),
-  password: passwordSchema,
-  confirmPassword: z.string().min(1, 'Password confirmation is required'),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Passwords do not match',
-  path: ['confirmPassword'],
-});
+export const resetPasswordSchema = z
+  .object({
+    token: z.string().min(1, 'Reset token is required'),
+    password: passwordSchema,
+    confirmPassword: z.string().min(1, 'Password confirmation is required'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
 /**
  * Change password request body schema.
  */
-export const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1, 'Current password is required'),
-  newPassword: passwordSchema,
-  confirmNewPassword: z.string().min(1, 'Password confirmation is required'),
-}).refine((data) => data.newPassword === data.confirmNewPassword, {
-  message: 'New passwords do not match',
-  path: ['confirmNewPassword'],
-});
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: passwordSchema,
+    confirmNewPassword: z.string().min(1, 'Password confirmation is required'),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: 'New passwords do not match',
+    path: ['confirmNewPassword'],
+  });
 
 /**
  * Verify email request body schema.

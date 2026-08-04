@@ -35,7 +35,10 @@ const sendSuccess = (res, { statusCode = STATUS_CODES.OK, message, data = null }
  * @param {Array} [options.errors] - Array of error details
  * @returns {import('express').Response}
  */
-const sendError = (res, { statusCode = STATUS_CODES.INTERNAL_SERVER_ERROR, message, errors = [] }) => {
+const sendError = (
+  res,
+  { statusCode = STATUS_CODES.INTERNAL_SERVER_ERROR, message, errors = [] },
+) => {
   return res.status(statusCode).json({
     success: false,
     message,

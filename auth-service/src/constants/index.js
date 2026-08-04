@@ -58,7 +58,8 @@ export const API_PREFIX = '/api/v1';
 export const PASSWORD_POLICY = {
   MIN_LENGTH: 8,
   MAX_LENGTH: 128,
-  REGEX: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])[A-Za-z\d!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{8,128}$/,
+  REGEX:
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])[A-Za-z\d!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{8,128}$/,
   REGEX_DESCRIPTION:
     'Password must be at least 8 characters and contain uppercase, lowercase, number, and special character',
 };

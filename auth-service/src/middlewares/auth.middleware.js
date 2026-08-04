@@ -51,7 +51,11 @@ const authenticate = async (req, _res, next) => {
     next();
   } catch (error) {
     logger.debug('Authentication failed:', error.message);
-    next(error instanceof UnauthorizedError ? error : new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED));
+    next(
+      error instanceof UnauthorizedError
+        ? error
+        : new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED),
+    );
   }
 };
 
@@ -69,9 +73,7 @@ const authorize = (...roles) => {
     }
 
     if (!roles.includes(req.user.role)) {
-      return next(
-        new ForbiddenError(ERROR_MESSAGES.INSUFFICIENT_ROLE),
-      );
+      return next(new ForbiddenError(ERROR_MESSAGES.INSUFFICIENT_ROLE));
     }
 
     next();

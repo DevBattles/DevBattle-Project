@@ -7,8 +7,8 @@ import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
-import sanitizeXSS from './middlewares/sanitize.middleware.js';
 
+import sanitizeXSS from './middlewares/sanitize.middleware.js';
 import { env } from './config/env.js';
 import appConfig from './config/app.config.js';
 import corsConfig from './config/cors.config.js';
@@ -18,7 +18,6 @@ import { generalLimiter } from './middlewares/rateLimiter.middleware.js';
 import errorHandler from './middlewares/error.middleware.js';
 import notFoundHandler from './middlewares/notFound.middleware.js';
 import setupSwagger from './swagger/setup.js';
-import { logger } from './utils/logger.js';
 
 const app = express();
 
