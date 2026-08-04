@@ -21,6 +21,7 @@ import {
 } from '../utils/errors.js';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../constants/messages.js';
 import jwtConfig from '../config/jwt.config.js';
+import { env } from '../config/env.js';
 
 import emailService from './email.service.js';
 
@@ -63,6 +64,37 @@ class AuthService {
       verificationToken: hashedVerificationToken,
       verificationTokenExpiry,
     });
+
+    // Provision profile in User Service (non-blocking, logged appropriately)
+    try {
+      const nameParts = name.trim().split(/\s+/);
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      const userSvcRes = await fetch(`${env.USER_SERVICE_URL}/api/v1/internal/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-internal-api-key': env.INTERNAL_API_KEY,
+        },
+        body: JSON.stringify({
+          authUserId: user.id,
+          email: user.email,
+          firstName,
+          lastName,
+          role: user.role,
+        }),
+      });
+
+      if (!userSvcRes.ok) {
+        const errText = await userSvcRes.text();
+        logger.error(`Failed to provision user profile in User Service. Status: ${userSvcRes.status}, Error: ${errText}`);
+      } else {
+        logger.info(`Successfully provisioned user profile in User Service for user: ${user.id}`);
+      }
+    } catch (err) {
+      logger.error('Error calling User Service to provision profile:', err);
+    }
 
     // Send verification email (non-blocking)
     emailService.sendVerificationEmail(user, verificationToken).catch((err) => {

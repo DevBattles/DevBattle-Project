@@ -52,6 +52,10 @@ const env = {
   RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 15 * 60 * 1000,
   RATE_LIMIT_MAX_REQUESTS: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10) || 100,
 
+  // User Service Integration
+  USER_SERVICE_URL: process.env.USER_SERVICE_URL || 'http://localhost:4001',
+  INTERNAL_API_KEY: process.env.INTERNAL_API_KEY || 'internal-service-token-change-me',
+
   // Logging
   LOG_LEVEL: process.env.LOG_LEVEL || 'debug',
 };
