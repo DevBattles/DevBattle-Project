@@ -6,7 +6,7 @@ import { env } from './env.js';
 
 const jwtConfig = {
   access: {
-    secret: env.JWT_ACCESS_SECRET,
+    secret: env.JWT_ACCESS_SECRET || env.JWT_SECRET || 'devbattle-shared-jwt-secret',
     expiresIn: env.JWT_ACCESS_EXPIRES_IN,
     /** Expiration in milliseconds for token validation */
     expiresInMs: 15 * 60 * 1000, // 15 minutes
