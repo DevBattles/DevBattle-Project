@@ -34,9 +34,9 @@ services:
       NODE_ENV: production
       PORT: 4001
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/devbattle
-      JWT_SECRET: ${JWT_SECRET:-devbattle-super-secret-shared-jwt-key-change-me}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-devbattle-shared-jwt-secret}
       JWT_ISSUER: devbattle-auth-service
-      JWT_AUDIENCE: devbattle-user-service
+      JWT_AUDIENCE: devbattle-client
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:-internal-service-token-change-me}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
     ports:
