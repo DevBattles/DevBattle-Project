@@ -30,10 +30,10 @@ export const config = {
   databaseUrl: env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/devbattle',
 
   jwt: {
-    secret: env.JWT_SECRET || 'devbattle-super-secret-shared-jwt-key-change-me',
+    secret: env.JWT_SECRET || 'your-access-secret-key-change-in-production',
     publicKey: env.JWT_PUBLIC_KEY || '',
     issuer: env.JWT_ISSUER || 'devbattle-auth-service',
-    audience: env.JWT_AUDIENCE || 'devbattle-question-service',
+    audience: env.JWT_AUDIENCE || 'devbattle-client',
   },
 
   internalApiKey: env.INTERNAL_API_KEY || 'internal-service-token-change-me',
