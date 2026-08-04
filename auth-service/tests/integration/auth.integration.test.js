@@ -3,6 +3,7 @@
 // ===========================================
 
 import request from 'supertest';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import '../setup.js';
 
 // Mock the database module before importing app

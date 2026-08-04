@@ -5,9 +5,10 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
-import { env } from './env.js';
 import * as schema from '../database/schema.js';
 import * as relations from '../database/relations.js';
+
+import { env } from './env.js';
 
 const connectionString = env.DATABASE_URL;
 

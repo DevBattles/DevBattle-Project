@@ -38,11 +38,7 @@ class UserRepository {
    * @returns {Promise<Object|null>}
    */
   async findByVerificationToken(token) {
-    const result = await db
-      .select()
-      .from(users)
-      .where(eq(users.verificationToken, token))
-      .limit(1);
+    const result = await db.select().from(users).where(eq(users.verificationToken, token)).limit(1);
     return result[0] || null;
   }
 
@@ -66,11 +62,7 @@ class UserRepository {
    * @returns {Promise<Object|null>}
    */
   async findByRefreshToken(tokenHash) {
-    const result = await db
-      .select()
-      .from(users)
-      .where(eq(users.refreshToken, tokenHash))
-      .limit(1);
+    const result = await db.select().from(users).where(eq(users.refreshToken, tokenHash)).limit(1);
     return result[0] || null;
   }
 

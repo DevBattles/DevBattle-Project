@@ -2,7 +2,7 @@
 // Error Handler Middleware
 // ===========================================
 
-import { AppError, ValidationError } from '../utils/errors.js';
+import { AppError } from '../utils/errors.js';
 import { STATUS_CODES } from '../constants/index.js';
 import { ERROR_MESSAGES } from '../constants/messages.js';
 import { logger } from '../utils/logger.js';
@@ -84,10 +84,9 @@ const errorHandler = (err, req, res, _next) => {
 
   // Default error response
   const statusCode = err.statusCode || STATUS_CODES.INTERNAL_SERVER_ERROR;
-  const message =
-    appConfig.isProduction
-      ? ERROR_MESSAGES.INTERNAL_ERROR
-      : err.message || ERROR_MESSAGES.INTERNAL_ERROR;
+  const message = appConfig.isProduction
+    ? ERROR_MESSAGES.INTERNAL_ERROR
+    : err.message || ERROR_MESSAGES.INTERNAL_ERROR;
 
   return res.status(statusCode).json({
     success: false,

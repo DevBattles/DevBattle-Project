@@ -11,7 +11,8 @@ export const SUCCESS_MESSAGES = {
   ME_SUCCESS: 'User profile retrieved successfully.',
 
   // Password
-  FORGOT_PASSWORD_SUCCESS: 'If an account exists with that email, a password reset link has been sent.',
+  FORGOT_PASSWORD_SUCCESS:
+    'If an account exists with that email, a password reset link has been sent.',
   RESET_PASSWORD_SUCCESS: 'Password has been reset successfully.',
   CHANGE_PASSWORD_SUCCESS: 'Password changed successfully.',
 

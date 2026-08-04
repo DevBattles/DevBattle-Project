@@ -14,4 +14,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    host: true,
+    // Allow the Arena preview origin (and any sandbox host) to reach the dev server.
+    allowedHosts: true,
+  },
 })

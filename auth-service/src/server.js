@@ -46,7 +46,9 @@ const testDatabaseConnection = async () => {
     logger.info('Database connection established.');
   } catch (error) {
     logger.warn(`Database connection failed: ${error.message}`);
-    logger.warn('Server will start, but database operations will fail until connection is restored.');
+    logger.warn(
+      'Server will start, but database operations will fail until connection is restored.',
+    );
   }
 };
 

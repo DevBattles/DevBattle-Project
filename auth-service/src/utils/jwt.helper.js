@@ -5,8 +5,9 @@
 import jwt from 'jsonwebtoken';
 
 import jwtConfig from '../config/jwt.config.js';
-import { UnauthorizedError } from './errors.js';
 import { ERROR_MESSAGES } from '../constants/messages.js';
+
+import { UnauthorizedError } from './errors.js';
 
 /**
  * Generate an access token for a user.

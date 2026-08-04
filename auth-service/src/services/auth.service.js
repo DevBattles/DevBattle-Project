@@ -12,7 +12,6 @@ import {
 import { generateToken, hashToken } from '../utils/token.helper.js';
 import { sanitizeUser } from '../utils/response.helper.js';
 import { setRefreshTokenCookie, clearRefreshTokenCookie } from '../utils/cookie.helper.js';
-import emailService from './email.service.js';
 import { logger } from '../utils/logger.js';
 import {
   ConflictError,
@@ -22,6 +21,8 @@ import {
 } from '../utils/errors.js';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../constants/messages.js';
 import jwtConfig from '../config/jwt.config.js';
+
+import emailService from './email.service.js';
 
 /**
  * Authentication service containing all auth-related business logic.
@@ -157,8 +158,8 @@ class AuthService {
       throw new UnauthorizedError(ERROR_MESSAGES.REFRESH_TOKEN_INVALID);
     }
 
-    // Verify the refresh token JWT
-    const decoded = verifyRefreshToken(refreshToken);
+    // Verify the refresh token JWT (throws if invalid/expired)
+    verifyRefreshToken(refreshToken);
 
     // Hash the provided refresh token to compare with stored hash
     const hashedToken = hashToken(refreshToken);

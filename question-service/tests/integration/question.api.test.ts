@@ -6,13 +6,18 @@ import { config } from '../../src/config/env';
 import { pool } from '../../src/database/db';
 
 const app = createApp();
+// The Auth Service issues UUID identifiers; the questions/bookmarks schema stores
+// created_by and user_id as uuid columns, so JWT `sub` values must be valid UUIDs.
+const ADMIN_AUTH_ID = '11111111-1111-4111-8111-111111111111';
+const MENTOR_AUTH_ID = 'b59c9b6d-3c0a-4f1b-8f4a-1d2e3f4a5b6c';
+const STUDENT_AUTH_ID = '22222222-2222-4222-8222-222222222222';
 const adminToken = signToken({
-  sub: 'auth-admin',
+  sub: ADMIN_AUTH_ID,
   role: Role.ADMIN,
   permissions: Object.values(Permission) as Permission[],
 });
-const mentorToken = signToken({ sub: 'auth-mentor', role: Role.MENTOR });
-const studentToken = signToken({ sub: 'auth-student', role: Role.STUDENT });
+const mentorToken = signToken({ sub: MENTOR_AUTH_ID, role: Role.MENTOR });
+const studentToken = signToken({ sub: STUDENT_AUTH_ID, role: Role.STUDENT });
 
 let dbReady = false;
 

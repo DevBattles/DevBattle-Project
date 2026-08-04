@@ -13,7 +13,8 @@ const env = {
   API_PREFIX: process.env.API_PREFIX || '/api/v1',
 
   // Database
-  DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/devbattle_auth',
+  DATABASE_URL:
+    process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/devbattle_auth',
 
   // JWT
   JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET || 'access-secret-change-me',
@@ -71,7 +72,9 @@ const validateEnv = () => {
     const prodMissing = productionRequired.filter((key) => !env[key] || env[key] === '');
 
     if (prodMissing.length > 0) {
-      throw new Error(`Missing required production environment variables: ${prodMissing.join(', ')}`);
+      throw new Error(
+        `Missing required production environment variables: ${prodMissing.join(', ')}`,
+      );
     }
   }
 };
