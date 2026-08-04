@@ -16,9 +16,9 @@ export const RegistrationQueuePage: React.FC = () => {
 
   const resolveRole = (user: User): Role => roleOverrides[user.id] ?? user.role;
 
-  const handleApprove = (user: User) => {
+  const handleApprove = async (user: User) => {
     const assignedRole = resolveRole(user);
-    const result = approveUser(user.id, assignedRole);
+    const result = await approveUser(user.id, assignedRole);
 
     if (!result.ok) {
       addToast('error', 'Approval Failed', result.error);
@@ -32,8 +32,8 @@ export const RegistrationQueuePage: React.FC = () => {
     );
   };
 
-  const handleReject = (user: User) => {
-    const result = rejectUser(user.id);
+  const handleReject = async (user: User) => {
+    const result = await rejectUser(user.id);
     if (!result.ok) {
       addToast('error', 'Action Failed', result.error);
       return;

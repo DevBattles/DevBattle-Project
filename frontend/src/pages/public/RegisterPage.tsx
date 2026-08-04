@@ -34,7 +34,7 @@ export const RegisterPage: React.FC = () => {
     setBatchName('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -43,7 +43,7 @@ export const RegisterPage: React.FC = () => {
       return;
     }
 
-    const result = register({
+    const result = await register({
       name,
       email,
       password,
