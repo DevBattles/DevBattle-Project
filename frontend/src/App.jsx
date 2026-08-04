@@ -67,10 +67,10 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <DataProvider>
-          <AuthProvider>
-            <CommandPaletteProvider>
-              <ToastProvider>
+        <ToastProvider>
+          <DataProvider>
+            <AuthProvider>
+              <CommandPaletteProvider>
                 <Router>
                   <CommandPalette />
                   <ToastContainer />
@@ -160,10 +160,10 @@ export function App() {
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </Router>
-              </ToastProvider>
-            </CommandPaletteProvider>
-          </AuthProvider>
-        </DataProvider>
+              </CommandPaletteProvider>
+            </AuthProvider>
+          </DataProvider>
+        </ToastProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

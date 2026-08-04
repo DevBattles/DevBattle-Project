@@ -20,12 +20,12 @@ export const LoginPage: React.FC = () => {
 
   const redirectTo = (location.state as { from?: string } | null)?.from;
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsSubmitting(true);
 
-    const result = login(email, password);
+    const result = await login(email, password);
 
     if (!result.ok || !result.user) {
       setIsSubmitting(false);
