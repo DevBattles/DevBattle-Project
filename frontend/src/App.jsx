@@ -1,14 +1,15 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { ThemeProvider } from './context/ThemeContext';
+import { DataProvider } from './context/DataContext';
 import { AuthProvider } from './context/AuthContext';
 import { CommandPaletteProvider } from './context/CommandPaletteContext';
 import { ToastProvider } from './context/ToastContext';
 
 import { CommandPalette } from './components/ui/CommandPalette';
 import { ToastContainer } from './components/ui/ToastContainer';
+import { ProtectedRoute, PublicOnlyRoute } from './components/auth/ProtectedRoute';
 
 import { PublicLayout } from './components/layout/PublicLayout';
 import { AppLayout } from './components/layout/AppLayout';
@@ -66,75 +67,103 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AuthProvider>
-          <CommandPaletteProvider>
-            <ToastProvider>
-              <Router>
-                <CommandPalette />
-                <ToastContainer />
+        <DataProvider>
+          <AuthProvider>
+            <CommandPaletteProvider>
+              <ToastProvider>
+                <Router>
+                  <CommandPalette />
+                  <ToastContainer />
 
-                <Routes>
-                  {/* Public Layout Routes */}
-                  <Route element={<PublicLayout />}>
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/features" element={<FeaturesPage />} />
-                    <Route path="/about" element={<AboutPage />} />
-                    <Route path="/contact" element={<ContactPage />} />
-                    <Route path="/pricing" element={<PricingPage />} />
-                    <Route path="/faq" element={<FAQPage />} />
-                    <Route path="/sitemap" element={<SitemapPage />} />
-                  </Route>
+                  <Routes>
+                    {/* Public Layout Routes */}
+                    <Route element={<PublicLayout />}>
+                      <Route path="/" element={<LandingPage />} />
+                      <Route path="/features" element={<FeaturesPage />} />
+                      <Route path="/about" element={<AboutPage />} />
+                      <Route path="/contact" element={<ContactPage />} />
+                      <Route path="/pricing" element={<PricingPage />} />
+                      <Route path="/faq" element={<FAQPage />} />
+                      <Route path="/sitemap" element={<SitemapPage />} />
+                    </Route>
 
-                  {/* Auth Auth Pages without header wrappers */}
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
-                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                  <Route path="/email-verification" element={<EmailVerificationPage />} />
+                    {/* Auth Pages without header wrappers (blocked while signed in) */}
+                    <Route
+                      path="/login"
+                      element={
+                        <PublicOnlyRoute>
+                          <LoginPage />
+                        </PublicOnlyRoute>
+                      }
+                    />
+                    <Route
+                      path="/register"
+                      element={
+                        <PublicOnlyRoute>
+                          <RegisterPage />
+                        </PublicOnlyRoute>
+                      }
+                    />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/email-verification" element={<EmailVerificationPage />} />
 
-                  {/* High Fidelity Coding Workspace (Full Screen IDE) */}
-                  <Route path="/workspace/:problemId" element={<CodingWorkspacePage />} />
+                    {/* High Fidelity Coding Workspace (Full Screen IDE) */}
+                    <Route element={<ProtectedRoute allow={['student', 'mentor']} />}>
+                      <Route path="/workspace/:problemId" element={<CodingWorkspacePage />} />
+                    </Route>
 
-                  {/* Authenticated Application Routes (Sidebar Layout) */}
-                  <Route element={<AppLayout />}>
-                    {/* Student Routes */}
-                    <Route path="/dashboard" element={<StudentDashboard />} />
-                    <Route path="/questions" element={<QuestionBankPage />} />
-                    <Route path="/homework" element={<HomeworkPage />} />
-                    <Route path="/contests" element={<ContestsPage />} />
-                    <Route path="/projects" element={<ProjectsPage />} />
-                    <Route path="/submissions" element={<SubmissionsPage />} />
-                    <Route path="/leaderboard" element={<LeaderboardPage />} />
-                    <Route path="/progress" element={<ProgressPage />} />
-                    <Route path="/ai-reviews" element={<AIReviewsPage />} />
-                    <Route path="/achievements" element={<AchievementsPage />} />
-                    <Route path="/calendar" element={<CalendarPage />} />
-                    <Route path="/notifications" element={<NotificationsPage />} />
-                    <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/settings" element={<SettingsPage />} />
+                    {/* Authenticated Application Routes (Sidebar Layout) */}
+                    <Route element={<ProtectedRoute />}>
+                      <Route element={<AppLayout />}>
+                        {/* Shared - available to every signed-in role */}
+                        <Route path="/profile" element={<ProfilePage />} />
+                        <Route path="/settings" element={<SettingsPage />} />
+                        <Route path="/notifications" element={<NotificationsPage />} />
 
-                    {/* Mentor Routes */}
-                    <Route path="/mentor" element={<MentorDashboard />} />
-                    <Route path="/mentor/homework-builder" element={<HomeworkBuilderPage />} />
-                    <Route path="/mentor/question-builder" element={<QuestionBuilderPage />} />
-                    <Route path="/mentor/contests" element={<MentorContestsPage />} />
-                    <Route path="/mentor/students" element={<MentorStudentsPage />} />
-                    <Route path="/mentor/analytics" element={<MentorAnalyticsPage />} />
+                        {/* Student Routes */}
+                        <Route element={<ProtectedRoute allow={['student']} />}>
+                          <Route path="/dashboard" element={<StudentDashboard />} />
+                          <Route path="/questions" element={<QuestionBankPage />} />
+                          <Route path="/homework" element={<HomeworkPage />} />
+                          <Route path="/contests" element={<ContestsPage />} />
+                          <Route path="/projects" element={<ProjectsPage />} />
+                          <Route path="/submissions" element={<SubmissionsPage />} />
+                          <Route path="/leaderboard" element={<LeaderboardPage />} />
+                          <Route path="/progress" element={<ProgressPage />} />
+                          <Route path="/ai-reviews" element={<AIReviewsPage />} />
+                          <Route path="/achievements" element={<AchievementsPage />} />
+                          <Route path="/calendar" element={<CalendarPage />} />
+                        </Route>
 
-                    {/* Admin Routes */}
-                    <Route path="/admin" element={<AdminDashboard />} />
-                    <Route path="/admin/approvals" element={<RegistrationQueuePage />} />
-                    <Route path="/admin/users" element={<UserManagementPage />} />
-                    <Route path="/admin/colleges" element={<CollegeManagementPage />} />
-                    <Route path="/admin/audit-logs" element={<AuditLogsPage />} />
-                  </Route>
+                        {/* Mentor Routes */}
+                        <Route element={<ProtectedRoute allow={['mentor']} />}>
+                          <Route path="/mentor" element={<MentorDashboard />} />
+                          <Route path="/mentor/homework-builder" element={<HomeworkBuilderPage />} />
+                          <Route path="/mentor/question-builder" element={<QuestionBuilderPage />} />
+                          <Route path="/mentor/contests" element={<MentorContestsPage />} />
+                          <Route path="/mentor/students" element={<MentorStudentsPage />} />
+                          <Route path="/mentor/analytics" element={<MentorAnalyticsPage />} />
+                        </Route>
 
-                  {/* Catch-all redirect to Landing */}
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-              </Router>
-            </ToastProvider>
-          </CommandPaletteProvider>
-        </AuthProvider>
+                        {/* Admin Routes */}
+                        <Route element={<ProtectedRoute allow={['admin']} />}>
+                          <Route path="/admin" element={<AdminDashboard />} />
+                          <Route path="/admin/approvals" element={<RegistrationQueuePage />} />
+                          <Route path="/admin/users" element={<UserManagementPage />} />
+                          <Route path="/admin/colleges" element={<CollegeManagementPage />} />
+                          <Route path="/admin/audit-logs" element={<AuditLogsPage />} />
+                        </Route>
+                      </Route>
+                    </Route>
+
+                    {/* Catch-all redirect to Landing */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </Router>
+              </ToastProvider>
+            </CommandPaletteProvider>
+          </AuthProvider>
+        </DataProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

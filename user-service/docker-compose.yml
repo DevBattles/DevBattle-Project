@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: devbattle-user-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: devbattle
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d devbattle']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: devbattle-user-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4001
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/devbattle
+      JWT_SECRET: ${JWT_SECRET:-devbattle-super-secret-shared-jwt-key-change-me}
+      JWT_ISSUER: devbattle-auth-service
+      JWT_AUDIENCE: devbattle-user-service
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-internal-service-token-change-me}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+    ports:
+      - '4001:4001'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:4001/api/v1/health']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

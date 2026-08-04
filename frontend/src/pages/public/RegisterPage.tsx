@@ -1,22 +1,70 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Terminal, User, Mail, Building2, CheckCircle2 } from 'lucide-react';
+import { Terminal, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { useToast } from '../../context/ToastContext';
-import { mockColleges } from '../../data/mockData';
+import { useAuth } from '../../context/AuthContext';
+import { useData } from '../../context/DataContext';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
+  const { register } = useAuth();
+  const { colleges } = useData();
+
   const [role, setRole] = useState<'student' | 'mentor'>('student');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [collegeId, setCollegeId] = useState(colleges[0]?.id ?? '');
+  const [branchName, setBranchName] = useState('');
+  const [batchName, setBatchName] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
+
+  const selectedCollege = useMemo(() => colleges.find((c) => c.id === collegeId), [colleges, collegeId]);
+  const branches = selectedCollege?.branches ?? [];
+  const batches = branches.find((b) => b.name === branchName)?.batches ?? [];
+
+  const handleCollegeChange = (value: string) => {
+    setCollegeId(value);
+    setBranchName('');
+    setBatchName('');
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    const result = register({
+      name,
+      email,
+      password,
+      role,
+      collegeId,
+      branchName: branchName || branches[0]?.name,
+      batchName: batchName || undefined,
+    });
+
+    if (!result.ok) {
+      setError(result.error ?? 'Registration failed. Please try again.');
+      addToast('error', 'Registration Failed', result.error);
+      return;
+    }
+
     setSubmitted(true);
-    addToast('info', 'Registration Submitted', 'Your account application has been routed to Admin Approval Queue.');
+    addToast('info', 'Registration Submitted', 'Your application has been routed to the Super Admin approval queue.');
   };
+
+  const inputClass =
+    'w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500';
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
@@ -33,15 +81,14 @@ export const RegisterPage: React.FC = () => {
           <div className="text-center py-8 space-y-4">
             <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto animate-bounce" />
             <h2 className="text-xl font-bold text-white">Registration Application Submitted!</h2>
-            <p className="text-xs text-slate-400 max-w-xs mx-auto">
+            <p className="text-xs text-slate-400 max-w-sm mx-auto">
               Per strict security protocol, every account application is verified by the Super Admin before activation.
+              Once approved, sign in with <strong className="text-slate-200">{email.toLowerCase()}</strong> and the
+              password you just created.
             </p>
             <div className="pt-2 flex justify-center gap-3">
               <Button variant="glow" size="sm" onClick={() => navigate('/login')}>
                 Go to Sign In
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate('/admin/approvals')}>
-                View Admin Queue (Demo)
               </Button>
             </div>
           </div>
@@ -73,52 +120,136 @@ export const RegisterPage: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">Full Name</label>
+                <label htmlFor="reg-name" className="block text-xs font-bold text-slate-300 mb-1">
+                  Full Name
+                </label>
                 <input
+                  id="reg-name"
                   type="text"
                   required
                   placeholder="Rohan Mehta"
-                  className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className={inputClass}
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">College Email</label>
+                <label htmlFor="reg-email" className="block text-xs font-bold text-slate-300 mb-1">
+                  College Email
+                </label>
                 <input
+                  id="reg-email"
                   type="email"
                   required
                   placeholder="rohan@krmangalam.edu.in"
-                  className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={inputClass}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">Select College</label>
-                <select className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
-                  {mockColleges.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
+                <label htmlFor="reg-college" className="block text-xs font-bold text-slate-300 mb-1">
+                  Select College
+                </label>
+                <select
+                  id="reg-college"
+                  required
+                  value={collegeId}
+                  onChange={(e) => handleCollegeChange(e.target.value)}
+                  className={inputClass}
+                >
+                  <option value="" disabled>
+                    Choose your campus
+                  </option>
+                  {colleges.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">Branch / Department</label>
-                <select className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
-                  <option>Computer Science & Engineering</option>
-                  <option>AI & Data Science</option>
+                <label htmlFor="reg-branch" className="block text-xs font-bold text-slate-300 mb-1">
+                  Branch / Department
+                </label>
+                <select
+                  id="reg-branch"
+                  value={branchName}
+                  onChange={(e) => {
+                    setBranchName(e.target.value);
+                    setBatchName('');
+                  }}
+                  className={inputClass}
+                  disabled={branches.length === 0}
+                >
+                  <option value="">{branches.length ? 'Select branch' : 'No branches configured yet'}</option>
+                  {branches.map((b) => (
+                    <option key={b.id} value={b.name}>
+                      {b.name}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1">Password</label>
-              <input
-                type="password"
-                required
-                placeholder="••••••••"
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
-              />
+            {batches.length > 0 && (
+              <div>
+                <label htmlFor="reg-batch" className="block text-xs font-bold text-slate-300 mb-1">
+                  Batch / Section
+                </label>
+                <select id="reg-batch" value={batchName} onChange={(e) => setBatchName(e.target.value)} className={inputClass}>
+                  <option value="">Select batch (optional)</option>
+                  {batches.map((b) => (
+                    <option key={b.id} value={b.name}>
+                      {b.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="reg-password" className="block text-xs font-bold text-slate-300 mb-1">
+                  Password
+                </label>
+                <input
+                  id="reg-password"
+                  type="password"
+                  required
+                  minLength={6}
+                  placeholder="Min. 6 characters"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label htmlFor="reg-confirm" className="block text-xs font-bold text-slate-300 mb-1">
+                  Confirm Password
+                </label>
+                <input
+                  id="reg-confirm"
+                  type="password"
+                  required
+                  minLength={6}
+                  placeholder="Re-enter password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
             </div>
+
+            {error && (
+              <div className="flex items-start gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2.5 text-[11px] text-rose-300">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-px" />
+                <span>{error}</span>
+              </div>
+            )}
 
             <Button type="submit" variant="glow" className="w-full">
               Submit Registration for Admin Approval

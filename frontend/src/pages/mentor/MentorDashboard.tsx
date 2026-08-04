@@ -5,10 +5,16 @@ import { StatCard } from '../../components/ui/StatCard';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
-import { mockHomework, mockColleges } from '../../data/mockData';
+import { mockHomework } from '../../data/mockData';
+import { useAuth } from '../../context/AuthContext';
 
 export const MentorDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { currentUser, users } = useAuth();
+
+  const batchStudents = users.filter(
+    (u) => u.role === 'student' && (!currentUser?.collegeId || u.collegeId === currentUser.collegeId)
+  );
 
   return (
     <div className="space-y-8 pb-12">
@@ -17,10 +23,14 @@ export const MentorDashboard: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Badge variant="amber">Faculty Mentor Portal</Badge>
-            <span className="text-xs text-slate-400">KR Mangalam University · CS Dept</span>
+            <span className="text-xs text-slate-400">
+              {currentUser?.collegeName ?? 'DevBattles'} · {currentUser?.branchName ?? 'All Departments'}
+            </span>
           </div>
-          <h1 className="text-2xl font-black text-slate-100">Prof. Rajesh Sharma's Dashboard</h1>
-          <p className="text-xs text-slate-400">Managing Batch 2025 - Section A (64 Enrolled Students)</p>
+          <h1 className="text-2xl font-black text-slate-100">{currentUser?.name ?? 'Mentor'}'s Dashboard</h1>
+          <p className="text-xs text-slate-400">
+            Managing {currentUser?.batchName ?? 'your batches'} ({batchStudents.length} Enrolled Students)
+          </p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -35,7 +45,7 @@ export const MentorDashboard: React.FC = () => {
 
       {/* STAT CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <StatCard title="Active Batch Students" value="64" icon={<Users className="w-5 h-5 text-indigo-400" />} subtitle="Section A & B" />
+        <StatCard title="Active Batch Students" value={batchStudents.length} icon={<Users className="w-5 h-5 text-indigo-400" />} subtitle="Registered on your campus" />
         <StatCard title="Assigned Homework" value="3 Active" icon={<BookOpen className="w-5 h-5 text-amber-400" />} subtitle="Avg Completion 82%" />
         <StatCard title="AI Risk Alerts" value="2 Students" icon={<AlertTriangle className="w-5 h-5 text-rose-400" />} subtitle="Falling behind in DP" />
         <StatCard title="Batch Avg AI Score" value="88/100" icon={<CheckCircle2 className="w-5 h-5 text-emerald-400" />} subtitle="+4% vs last sprint" />
