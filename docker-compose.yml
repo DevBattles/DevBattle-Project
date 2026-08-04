@@ -1,6 +1,11 @@
 # DevBattle platform orchestration (root).
-# The User Microservice lives in ./user-service.
-# Run `docker compose up` to bring up PostgreSQL + the User Service together.
+# Microservices live in their own directories and share one PostgreSQL instance.
+# Run `docker compose up --build` to bring up PostgreSQL + all services.
+#
+# Services:
+#   postgres         — shared PostgreSQL 16 database (db: devbattle)
+#   user-service     — user profiles, avatars, skills (./user-service, port 4001)
+#   question-service — question bank, test cases, bookmarks (./question-service, port 4002)
 
 services:
   postgres:
@@ -43,6 +48,32 @@ services:
       - '4001:4001'
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:4001/api/v1/health']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  question-service:
+    build:
+      context: ./question-service
+      dockerfile: Dockerfile
+    container_name: devbattle-question-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4002
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/devbattle
+      JWT_SECRET: ${JWT_SECRET:-devbattle-super-secret-shared-jwt-key-change-me}
+      JWT_ISSUER: devbattle-auth-service
+      JWT_AUDIENCE: devbattle-question-service
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-internal-service-token-change-me}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+    ports:
+      - '4002:4002'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:4002/api/v1/health']
       interval: 15s
       timeout: 5s
       retries: 5
