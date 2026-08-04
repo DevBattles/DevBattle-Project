@@ -6,8 +6,10 @@ import { config } from '../../src/config/env';
 import { pool } from '../../src/database/db';
 
 const app = createApp();
+// The Auth Service issues UUID identifiers; provisioning & JWT sub must agree.
+const STUDENT_AUTH_ID = 'b59c9b6d-3c0a-4f1b-8f4a-1d2e3f4a5b6c';
 const adminToken = signToken({ sub: 'auth-admin', role: Role.ADMIN, permissions: Object.values(Permission) as Permission[] });
-const studentToken = signToken({ sub: 'auth-student', role: Role.STUDENT });
+const studentToken = signToken({ sub: STUDENT_AUTH_ID, role: Role.STUDENT });
 
 let dbReady = false;
 
@@ -71,7 +73,7 @@ describe('User Service — DB-backed flows', () => {
     const res = await request(app)
       .post('/api/v1/internal/users')
       .set('x-internal-api-key', config.internalApiKey)
-      .send({ authUserId: 'auth-student', email: 'student-flow@devbattle.io', role: Role.STUDENT });
+      .send({ authUserId: STUDENT_AUTH_ID, email: 'student-flow@devbattle.io', role: Role.STUDENT });
     expect([200, 201]).toContain(res.status);
   });
 
