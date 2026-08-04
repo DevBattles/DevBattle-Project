@@ -1,30 +1,61 @@
-import React, { useState } from 'react';
-import { Search, Filter, Bookmark, Code2, CheckCircle2, Building, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Bookmark, Code2, Loader2 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
-import { Badge } from '../../components/ui/Badge';
 import { QuestionCard } from '../../components/domain/QuestionCard';
-import { mockQuestions } from '../../data/mockData';
-import { Difficulty } from '../../types';
+import { Question } from '../../types';
 
 export const QuestionBankPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('All');
   const [selectedCompany, setSelectedCompany] = useState<string>('All');
   const [onlyBookmarked, setOnlyBookmarked] = useState(false);
+  
+  const [questionsList, setQuestionsList] = useState<Question[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const companies = ['All', 'Google', 'Amazon', 'Meta', 'Microsoft', 'Linear', 'Vercel'];
 
-  const filteredQuestions = mockQuestions.filter((q) => {
-    const matchesSearch =
-      q.title.toLowerCase().includes(search.toLowerCase()) ||
-      q.category.toLowerCase().includes(search.toLowerCase()) ||
-      q.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      setLoading(true);
+      try {
+        let url = `/api/v1/questions?status=published&limit=100`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        if (selectedDifficulty !== 'All') url += `&difficulty=${selectedDifficulty}`;
+        if (onlyBookmarked) url += `&bookmarked=true`;
+        
+        const token = localStorage.getItem('devbattles.token');
+        const headers: HeadersInit = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const res = await fetch(url, { headers });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data && Array.isArray(json.data.items)) {
+            setQuestionsList(json.data.items);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching questions from API:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    const matchesDifficulty = selectedDifficulty === 'All' || q.difficulty === selectedDifficulty;
-    const matchesCompany = selectedCompany === 'All' || q.companies.includes(selectedCompany);
-    const matchesBookmark = !onlyBookmarked || q.isBookmarked;
+    const timer = setTimeout(() => {
+      fetchQuestions();
+    }, 300); // debounce input
 
-    return matchesSearch && matchesDifficulty && matchesCompany && matchesBookmark;
+    return () => clearTimeout(timer);
+  }, [search, selectedDifficulty, onlyBookmarked]);
+
+  const displayedQuestions = questionsList.filter((q) => {
+    if (selectedCompany !== 'All' && !q.companies?.includes(selectedCompany)) {
+      return false;
+    }
+    return true;
   });
 
   return (
@@ -36,7 +67,7 @@ export const QuestionBankPage: React.FC = () => {
             <span className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
               <Code2 className="w-5 h-5" />
             </span>
-            <h1 className="text-2xl font-black text-slate-100 light:text-slate-900">Algorithmic & Frontend Question Bank</h1>
+            <h1 className="text-2xl font-black text-slate-100">Algorithmic & Frontend Question Bank</h1>
           </div>
           <p className="text-xs text-slate-400">
             Practice production-grade DSA problems, system designs, and frontend challenges.
@@ -108,13 +139,18 @@ export const QuestionBankPage: React.FC = () => {
       </Card>
 
       {/* QUESTION GRID */}
-      {filteredQuestions.length === 0 ? (
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-400">
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+          <span className="text-xs">Loading coding challenges from Question Service...</span>
+        </div>
+      ) : displayedQuestions.length === 0 ? (
         <div className="text-center py-12 text-slate-500 text-sm">
           No matching problems found. Try clearing filters or searching for "Two Sum".
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredQuestions.map((question) => (
+          {displayedQuestions.map((question) => (
             <QuestionCard key={question.id} question={question} />
           ))}
         </div>

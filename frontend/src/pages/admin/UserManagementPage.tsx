@@ -47,7 +47,7 @@ export const UserManagementPage: React.FC = () => {
     [users]
   );
 
-  const handleSwitchRole = (user: User) => {
+  const handleSwitchRole = async (user: User) => {
     // Students and mentors flip between each other; admins are left untouched here.
     const nextRole: Role = user.role === 'student' ? 'mentor' : 'student';
 
@@ -56,7 +56,7 @@ export const UserManagementPage: React.FC = () => {
       return;
     }
 
-    const result = updateUserRole(user.id, nextRole);
+    const result = await updateUserRole(user.id, nextRole);
     if (!result.ok) {
       addToast('error', 'Role Update Failed', result.error);
       return;
@@ -64,9 +64,9 @@ export const UserManagementPage: React.FC = () => {
     addToast('success', 'Role Updated', `${user.name} is now a ${nextRole.toUpperCase()}.`);
   };
 
-  const handleToggleStatus = (user: User) => {
+  const handleToggleStatus = async (user: User) => {
     if (user.status === 'suspended') {
-      const result = updateUserStatus(user.id, 'active');
+      const result = await updateUserStatus(user.id, 'active');
       if (!result.ok) {
         addToast('error', 'Action Failed', result.error);
         return;
@@ -77,9 +77,9 @@ export const UserManagementPage: React.FC = () => {
     setPendingSuspension(user);
   };
 
-  const confirmSuspension = () => {
+  const confirmSuspension = async () => {
     if (!pendingSuspension) return;
-    const result = updateUserStatus(pendingSuspension.id, 'suspended');
+    const result = await updateUserStatus(pendingSuspension.id, 'suspended');
     if (!result.ok) {
       addToast('error', 'Action Failed', result.error);
     } else {
